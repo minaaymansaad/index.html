@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ba7bekk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 110'%3E%3Cpath d='M60 102C46 90 14 72 14 47C14 27 30 14 45 17C53 18 58 28 60 38C62 28 67 17 76 15C96 12 108 30 106 47C104 70 74 90 60 102Z' fill='none' stroke='%23d9739b' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lemonada:wght@600;700&family=Tajawal:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-1: #fde6f0;
+    --bg-2: #f6e6f8;
+    --glow: rgba(255, 255, 255, .75);
+    --env-back: #f2b7c7;
+    --env-inner: #df98b0;
+    --env-flap: #f9cfdc;
+    --front-l: #f1bfcf;
+    --front-r: #e7a9bd;
+    --front-b: #f5cad8;
+    --shadow: rgba(185, 70, 112, .32);
+    --paper: #fffafc;
+    --paper-2: #fdeef4;
+    --ink: #c4537d;
+    --hint: #b56d8c;
+    --red: #e0322b;
+    --blue: #2f6bd6;
+    --doodle: #d9739b;
+    --doodle-2: #8c78d0;
+    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+    --w: min(78vw, 360px, 52vh);
+    --h: calc(var(--w) * .64);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-1: #3a2233; --bg-2: #2a1b2c; --glow: rgba(255, 255, 255, .04);
+      --env-back: #8e4f69; --env-inner: #63344b; --env-flap: #b67391;
+      --front-l: #9d5f7b; --front-r: #874e69; --front-b: #a86c87;
+      --shadow: rgba(0, 0, 0, .5); --paper: #f7e9ef; --paper-2: #efd9e4;
+      --ink: #b5466f; --hint: #d9a6bf; --doodle: #e08aae; --doodle-2: #b19be6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-1: #3a2233; --bg-2: #2a1b2c; --glow: rgba(255, 255, 255, .04);
+    --env-back: #8e4f69; --env-inner: #63344b; --env-flap: #b67391;
+    --front-l: #9d5f7b; --front-r: #874e69; --front-b: #a86c87;
+    --shadow: rgba(0, 0, 0, .5); --paper: #f7e9ef; --paper-2: #efd9e4;
+    --ink: #b5466f; --hint: #d9a6bf; --doodle: #e08aae; --doodle-2: #b19be6;
+  }
+
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    overflow-x: hidden;
+    font-family: "Tajawal", "Segoe UI", system-ui, sans-serif;
+    background: var(--noise), radial-gradient(120% 80% at 0% 0%, var(--glow), transparent 60%), linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .stage { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; }
+
+  .stack {
+    display: flex; flex-direction: column; align-items: center;
+    transform: translate3d(0, 0, 0);
+    transition: transform .8s cubic-bezier(.4, 0, .2, 1);
+  }
+  .is-open .stack {
+    transform: translate3d(0, calc(var(--w) * .22), 0);
+    transition: transform 1s cubic-bezier(.22, 1, .36, 1) .2s;
+  }
+
+  .float {
+    position: relative;
+    width: var(--w); height: var(--h);
+    animation: float 7s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(0, -8px, 0); }
+  }
+
+  .envelope {
+    position: absolute; inset: 0;
+    perspective: 800px;
+    border-radius: 10px;
+    cursor: pointer; outline: none;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+  }
+  .envelope:focus-visible { outline: 2px dashed var(--ink); outline-offset: 12px; }
+  @media (hover: hover) and (pointer: fine) {
+    .envelope:hover { transform: translate3d(0, -6px, 0); }
+  }
+
+  .env-back {
+    position: absolute; inset: 0; z-index: 0;
+    border-radius: 10px;
+    background: var(--noise), linear-gradient(180deg, var(--env-inner) 0%, var(--env-back) 40%, var(--env-back) 100%);
+    box-shadow: 0 1px 2px rgba(120, 45, 80, .18), 0 22px 34px -18px var(--shadow);
+  }
+
+  .letter {
+    position: absolute; z-index: 1;
+    left: 12%; top: 8%; width: 76%;
+    height: calc(var(--w) * .5);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(var(--w) * .015);
+    padding: calc(var(--w) * .03) calc(var(--w) * .04);
+    border-radius: 3px;
+    background: var(--noise), linear-gradient(170deg, var(--paper) 0%, var(--paper-2) 100%);
+    box-shadow: 0 1px 2px rgba(150, 60, 95, .14), 0 8px 16px -8px rgba(150, 60, 95, .35);
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    transition: transform .7s cubic-bezier(.4, 0, .2, 1);
+    will-change: transform;
+  }
+  .is-open .letter {
+    transform: translate3d(0, calc(-100% - var(--h) * .12), 0) rotate(-1.2deg);
+    transition: transform 1s cubic-bezier(.22, 1, .36, 1) .25s;
+  }
+
+  .heart {
+    flex: none;
+    display: block;
+    width: calc(var(--w) * .24);
+    height: auto;
+    aspect-ratio: 120 / 110;
+    overflow: visible;
+  }
+  .heart .stroke {
+    fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    transition: stroke-dashoffset .2s ease;
+  }
+  .heart .fill-red { stroke: var(--red); stroke-width: 3.2; }
+  .heart .fill-blue { stroke: var(--blue); stroke-width: 3.2; }
+  .heart .line-a { stroke: var(--red); stroke-width: 4.2; }
+  .heart .line-b { stroke: var(--red); stroke-width: 3; opacity: .85; }
+  .is-open .heart .line-a { stroke-dashoffset: 0; transition: stroke-dashoffset .9s cubic-bezier(.45, 0, .25, 1) .7s; }
+  .is-open .heart .line-b { stroke-dashoffset: 0; transition: stroke-dashoffset .8s cubic-bezier(.45, 0, .25, 1) .9s; }
+  .is-open .heart .fill-red { stroke-dashoffset: 0; transition: stroke-dashoffset 1.1s linear 1.05s; }
+  .is-open .heart .fill-blue { stroke-dashoffset: 0; transition: stroke-dashoffset 1.1s linear 1.25s; }
+
+  .message {
+    margin: 0;
+    font-family: "Lemonada", "Tajawal", "Segoe UI", sans-serif;
+    font-weight: 700;
+    font-size: max(15px, calc(var(--w) * .075));
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--ink);
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .is-open .message {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: opacity .5s ease .75s, transform .5s cubic-bezier(.22, 1, .36, 1) .75s;
+  }
+
+  .doodle {
+    position: absolute;
+    height: auto;
+    overflow: visible;
+    opacity: 0;
+    transform: scale(.6) rotate(-8deg);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .doodle .stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    transition: stroke-dashoffset .2s ease;
+  }
+  .is-open .doodle {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    transition: opacity .5s ease 1.2s, transform .8s cubic-bezier(.22, 1, .36, 1) 1.2s;
+  }
+  .is-open .doodle .stroke { stroke-dashoffset: 0; transition: stroke-dashoffset .9s ease 1.25s; }
+  .d-flower { top: 4%; right: 4%; width: calc(var(--w) * .11); aspect-ratio: 1; color: var(--doodle); }
+  .d-spark { top: 9%; left: 7%; width: calc(var(--w) * .07); aspect-ratio: 1; color: var(--doodle-2); }
+  .d-spark2 { bottom: 8%; right: 8%; width: calc(var(--w) * .05); aspect-ratio: 1; color: var(--doodle-2); }
+  .d-bow { bottom: 5%; left: 5%; width: calc(var(--w) * .1); aspect-ratio: 40 / 28; color: var(--doodle); }
+
+  .env-front { position: absolute; inset: 0; z-index: 2; border-radius: 10px; overflow: hidden; }
+  .fold { position: absolute; inset: 0; }
+  .fold-l { background: var(--noise), var(--front-l); clip-path: polygon(0 0, 50% 58%, 0 100%); }
+  .fold-r { background: var(--noise), var(--front-r); clip-path: polygon(100% 0, 50% 58%, 100% 100%); }
+  .fold-b { background: var(--noise), var(--front-b); clip-path: polygon(0 100%, 50% 58%, 100% 100%); }
+
+  .env-flap {
+    position: absolute; top: 0; left: 0; width: 100%; height: 62%;
+    z-index: 3;
+    transform-origin: 50% 0;
+    filter: drop-shadow(0 3px 3px rgba(150, 60, 95, .25));
+    will-change: transform;
+    transition: transform .8s cubic-bezier(.45, 0, .2, 1), z-index 0s linear .4s;
+  }
+  .flap-shape {
+    width: 100%; height: 100%;
+    border-radius: 10px 10px 0 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .4) 0%, rgba(255, 255, 255, 0) 55%), var(--noise), var(--env-flap);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+  .is-open .env-flap { transform: rotateX(180deg); z-index: 0; }
+
+  .hint {
+    margin: calc(var(--w) * .16) 0 0;
+    font: 500 clamp(13px, 3.6vw, 15px)/1.4 "Tajawal", "Segoe UI", system-ui, sans-serif;
+    color: var(--hint);
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .float { animation: none; }
+    *, *::before, *::after {
+      transition-duration: .01ms !important;
+      transition-delay: 0s !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <div class="stack">
+      <div class="float">
+        <div class="envelope" id="envelope" role="button" tabindex="0" aria-expanded="false" aria-label="افتحي الرسالة">
+          <div class="env-back"></div>
+
+          <div class="letter">
+            <svg class="heart" viewBox="0 0 120 110" aria-hidden="true" focusable="false">
+              <defs>
+                <clipPath id="heartClip"><path id="heartShape"/></clipPath>
+                <clipPath id="leftHalf"><rect x="0" y="0" width="60" height="110"/></clipPath>
+                <clipPath id="rightHalf"><rect x="60" y="0" width="60" height="110"/></clipPath>
+              </defs>
+              <g clip-path="url(#heartClip)">
+                <g clip-path="url(#leftHalf)"><path id="fillRed" class="stroke fill-red" pathLength="1"/></g>
+                <g clip-path="url(#rightHalf)"><path id="fillBlue" class="stroke fill-blue" pathLength="1"/></g>
+              </g>
+              <path id="lineA" class="stroke line-a" pathLength="1"/>
+              <path id="lineB" class="stroke line-b" pathLength="1"/>
+            </svg>
+
+            <p class="message">بحبك والله</p>
+
+            <svg class="doodle d-flower" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">
+              <path class="stroke" pathLength="1" d="M0 0C-6-3-6-12 0-14C6-12 6-3 0 0Z"/>
+              <path class="stroke" pathLength="1" transform="rotate(72)" d="M0 0C-6-3-6-12 0-14C6-12 6-3 0 0Z"/>
+              <path class="stroke" pathLength="1" transform="rotate(144)" d="M0 0C-6-3-6-12 0-14C6-12 6-3 0 0Z"/>
+              <path class="stroke" pathLength="1" transform="rotate(216)" d="M0 0C-6-3-6-12 0-14C6-12 6-3 0 0Z"/>
+              <path class="stroke" pathLength="1" transform="rotate(288)" d="M0 0C-6-3-6-12 0-14C6-12 6-3 0 0Z"/>
+              <path class="stroke" pathLength="1" d="M3 0A3 3 0 1 1-3 0A3 3 0 1 1 3 0Z"/>
+            </svg>
+            <svg class="doodle d-spark" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false">
+              <path class="stroke" pathLength="1" d="M0-10Q1-1 10 0Q1 1 0 10Q-1 1-10 0Q-1-1 0-10Z"/>
+            </svg>
+            <svg class="doodle d-spark2" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false">
+              <path class="stroke" pathLength="1" d="M0-10Q1-1 10 0Q1 1 0 10Q-1 1-10 0Q-1-1 0-10Z"/>
+            </svg>
+            <svg class="doodle d-bow" viewBox="-20 -14 40 28" aria-hidden="true" focusable="false">
+              <path class="stroke" pathLength="1" d="M0 0C-4-8-16-10-16-2C-16 6-4 8 0 0Z"/>
+              <path class="stroke" pathLength="1" d="M0 0C4-8 16-10 16-2C16 6 4 8 0 0Z"/>
+            </svg>
+          </div>
+
+          <div class="env-front">
+            <div class="fold fold-l"></div>
+            <div class="fold fold-r"></div>
+            <div class="fold fold-b"></div>
+          </div>
+
+          <div class="env-flap"><div class="flap-shape"></div></div>
+        </div>
+      </div>
+      <p class="hint" id="hint" aria-live="polite">اضغطي على الظرف</p>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      function mulberry32(seed) {
+        var a = seed >>> 0;
+        return function () {
+          a = (a + 0x6d2b79f5) >>> 0;
+          var t = a;
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function heartPoints(t0, t1, steps, scale, ox, oy) {
+        var pts = [];
+        for (var i = 0; i <= steps; i++) {
+          var t = t0 + ((t1 - t0) * i) / steps;
+          var x = 16 * Math.pow(Math.sin(t), 3);
+          var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+          pts.push([60 + ox + x * 3 * scale, 55 + oy - y * 3 * scale]);
+        }
+        return pts;
+      }
+
+      function shakyPath(pts, rand, amount) {
+        var d = "";
+        for (var i = 0; i < pts.length; i++) {
+          var x = pts[i][0] + (rand() - 0.5) * amount;
+          var y = pts[i][1] + (rand() - 0.5) * amount;
+          d += (i === 0 ? "M" : " L") + x.toFixed(1) + " " + y.toFixed(1);
+        }
+        return d;
+      }
+
+      function scribblePath(rand, xa, xb, top, bottom, step) {
+        var y = top;
+        var toRight = true;
+        var d = "M" + (xa + (rand() - 0.5) * 3).toFixed(1) + " " + y.toFixed(1);
+        while (y < bottom) {
+          y += step * (0.8 + rand() * 0.4);
+          var x = toRight ? xb : xa;
+          d += " L" + (x + (rand() - 0.5) * 4).toFixed(1) + " " + y.toFixed(1);
+          toRight = !toRight;
+        }
+        return d;
+      }
+
+      var rand = mulberry32(2026);
+      document.getElementById("heartShape").setAttribute("d", shakyPath(heartPoints(0, Math.PI * 2, 120, 1, 0, 0), rand, 0));
+      document.getElementById("lineA").setAttribute("d", shakyPath(heartPoints(-0.2, Math.PI * 2 + 0.35, 120, 1, 0, 0), rand, 2.2));
+      document.getElementById("lineB").setAttribute("d", shakyPath(heartPoints(0.25, Math.PI * 2 - 0.12, 110, 0.98, 1.4, -1.3), rand, 2.6));
+      document.getElementById("fillRed").setAttribute("d", scribblePath(rand, 4, 60, 12, 108, 3.6));
+      document.getElementById("fillBlue").setAttribute("d", scribblePath(rand, 60, 116, 12, 108, 3.6));
+
+      var stage = document.getElementById("stage");
+      var envelope = document.getElementById("envelope");
+      var hint = document.getElementById("hint");
+
+      function setOpen(open) {
+        stage.classList.toggle("is-open", open);
+        envelope.setAttribute("aria-expanded", String(open));
+        envelope.setAttribute("aria-label", open ? "اقفلي الظرف" : "افتحي الرسالة");
+        hint.textContent = open ? "اقفلي الظرف تاني احنا هنهزر" : "دوسي ع الظرف";
+      }
+
+      function toggle() {
+        setOpen(!stage.classList.contains("is-open"));
+      }
+
+      envelope.addEventListener("click", toggle);
+      envelope.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggle();
+        }
+      });
+    })();
+  </script>
+</body>
+  </html>
